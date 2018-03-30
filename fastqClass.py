@@ -74,7 +74,7 @@ class DataFile:
     def HQ(self):
          
         # Create an empty column to track whether the SNP base meets quality threshold.
-        self.fqfiledf["HQ"] = ''
+        self.fqfiledf['HQ'] = ''
     
     
     def qualAverage(self):
@@ -109,6 +109,7 @@ class DataFile:
 class FastAReader:
     
     def __init__(self, fasta):
+        
         self.fasta = fasta
         
         # Read fastq with gzip library.
@@ -128,7 +129,53 @@ class FastAReader:
             faseqList.append(falines[j])
 
         self.fafiledf = pd.DataFrame({'Name': fanameList, 'Seq': faseqList})
+       
         
+    def positionSNP(self):
+        
+        
+        positionList = []
+        
+        # Initialize a counter called "i" with a value of 0
+        i = 0
+        
+        faseqList = self.fafiledf['Seq']
+        fanameList = self.fafiledf['Name']
+               
+        # Loop through the length of namesList while the counter is within the index of namesList
+        while i < len(fanameList)-1:
+            # If adjacent rows in namesList have the same beginning (and are thus different
+            # versions/SNPs of the same sequence), set sequence variable seq1 and seq2 to
+            # be the corresponding sequences. These should differ by 1 base (the SNP).
+            if fanameList[i].split("_")[0] == fanameList[i+1].split("_")[0]:
+                seq1 = faseqList[i]
+                seq2 = faseqList[i+1]
+                
+                # Find the position of the SNP and add it to positionList at the index
+                # of EACH sequence. If the SNP is at position 5, set BOTH indices of positionList
+                # corresponding to the sequences to 5.
+                self.position = [i for i in range(len(seq1)) if seq1[i] != seq2[i]][0]
+                positionList[i] = self.position
+                positionList[i+1] = self.position
+                
+            # Increment the counter to move forward through namesList
+            i += 1
+            
+        # Create a data frame called "searchdf" from the name, sequence, and position lists, with an
+        # empty column for counts that will be filled in later.
+        print(len(positionList))
+        if len(positionList) > 0:
+            self.fafiledf["Position"] = positionList
+        
+    
+    
+    
+    
+    
+    
+    
+    
+    
         
         
         
